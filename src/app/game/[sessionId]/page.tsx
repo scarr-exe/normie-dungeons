@@ -220,14 +220,14 @@ export default function GameRoom() {
 
         const { data: gs } = await supabase
             .from('game_state')
-            .insert({
+            .upsert({
                 session_id: sessionId,
                 current_turn_player_id: playerList[0].id,
                 dungeon_name: dungeonName,
                 dungeon_description: opening,
                 current_room_description: opening,
                 state: { phase: 'exploration', roomsCleared: 0 },
-            })
+            }, { onConflict: 'session_id' })
             .select()
             .single()
 
@@ -252,7 +252,11 @@ export default function GameRoom() {
 
     useEffect(() => {
         if (!loading && players.length > 0 && !gameState && !initializing) {
-            initializeGame(players)
+            const myPlayerInList = players.find(p => p.userId === user?.id)
+            const isHost = myPlayerInList?.turnOrder === 1
+            if (isHost) {
+                initializeGame(players)
+            }
         }
     }, [loading, players, gameState])
 
@@ -377,7 +381,7 @@ export default function GameRoom() {
                         {session?.currentRoom === session?.totalRooms ? ' — Boss Room' : ''}
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     {session?.mode === 'party' && (
                         <span className="text-xs bg-zinc-800 text-zinc-400 px-2 py-1 rounded-full">
                             Party Mode
@@ -387,13 +391,31 @@ export default function GameRoom() {
                         {Array.from({ length: session?.totalRooms || 6 }).map((_, i) => (
                             <div
                                 key={i}
-                                className={`w-2 h-2 rounded-full ${i < (session?.currentRoom || 1)
-                                        ? 'bg-white'
-                                        : 'bg-zinc-700'
+                                className={`w-2 h-2 rounded-full ${i < (session?.currentRoom || 1) ? 'bg-white' : 'bg-zinc-700'
                                     }`}
                             />
                         ))}
                     </div>
+                    <button
+                        onClick={async () => {
+                            if (myPlayer) {
+                                await supabase
+                                    .from('session_players')
+                                    .update({ is_active: false })
+                                    .eq('id', myPlayer.id)
+
+                                await supabase.from('messages').insert({
+                                    session_id: sessionId,
+                                    type: 'system',
+                                    content: `${user?.username} left the dungeon.`,
+                                })
+                            }
+                            router.push('/lobby')
+                        }}
+                        className="text-zinc-500 text-xs hover:text-zinc-300 transition-colors ml-2"
+                    >
+                        ← Leave
+                    </button>
                 </div>
             </div>
 
@@ -405,9 +427,11 @@ export default function GameRoom() {
                         {players.map(p => (
                             <div
                                 key={p.id}
-                                className={`rounded-xl p-3 border transition-colors ${p.id === currentTurnPlayerId
-                                        ? 'border-white bg-zinc-800'
-                                        : 'border-zinc-700 bg-zinc-900'
+                                className={`rounded-xl p-3 border transition-colors ${!p.isActive
+                                        ? 'border-zinc-800 bg-zinc-900 opacity-50'
+                                        : p.id === currentTurnPlayerId
+                                            ? 'border-white bg-zinc-800'
+                                            : 'border-zinc-700 bg-zinc-900'
                                     }`}
                             >
                                 <div className="flex items-center gap-2 mb-2">
@@ -416,29 +440,35 @@ export default function GameRoom() {
                                         alt={`Normie #${p.normieId}`}
                                         width={28}
                                         height={28}
-                                        className="rounded"
+                                        className={`rounded ${!p.isActive ? 'grayscale' : ''}`}
                                         style={{ imageRendering: 'pixelated' }}
                                         unoptimized
                                     />
                                     <div>
-                                        <p className="text-white text-xs font-medium">{p.username}</p>
+                                        <div className="flex items-center gap-1">
+                                            <p className="text-white text-xs font-medium">{p.username}</p>
+                                            {!p.isActive && (
+                                                <span className="text-xs text-zinc-600">offline</span>
+                                            )}
+                                        </div>
                                         <p className="text-zinc-500 text-xs">{p.characterClass}</p>
                                     </div>
                                 </div>
                                 <div className="w-full bg-zinc-700 rounded-full h-1.5">
                                     <div
-                                        className={`h-1.5 rounded-full transition-all ${p.hp / p.maxHp > 0.5 ? 'bg-green-500' :
-                                                p.hp / p.maxHp > 0.25 ? 'bg-yellow-500' : 'bg-red-500'
+                                        className={`h-1.5 rounded-full transition-all ${!p.isActive ? 'bg-zinc-600' :
+                                                p.hp / p.maxHp > 0.5 ? 'bg-green-500' :
+                                                    p.hp / p.maxHp > 0.25 ? 'bg-yellow-500' : 'bg-red-500'
                                             }`}
                                         style={{ width: `${(p.hp / p.maxHp) * 100}%` }}
                                     />
                                 </div>
                                 <p className="text-zinc-400 text-xs mt-1">{p.hp}/{p.maxHp} HP</p>
-                                {p.id === currentTurnPlayerId && (
+                                {p.isActive && p.id === currentTurnPlayerId && (
                                     <p className="text-white text-xs mt-1 font-medium">← Turn</p>
                                 )}
                             </div>
-                        ))}
+                        ))} 
                     </div>
                 </div>
 

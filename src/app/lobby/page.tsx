@@ -1,36 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useUser } from '@/hooks/useUser'
 import { NormieSelector } from '@/components/game/NormieSelector'
 import { CharacterSheet } from '@/components/game/CharacterSheet'
-import { createSession, joinSession, addPlayerToSession } from '@/lib/sessions'
+import { createSession, joinSession, addPlayerToSession, getSessionPlayers } from '@/lib/sessions'
 import { NormieCharacter } from '@/types/normie'
 import { useRouter } from 'next/navigation'
 
 type LobbyStep = 'choose_mode' | 'select_normie' | 'join_code'
 
 export default function LobbyPage() {
-  const { user } = useUser()
+  const { user, loading: userLoading } = useUser()
   const router = useRouter()
   const [step, setStep] = useState<LobbyStep>('choose_mode')
   const [selectedNormie, setSelectedNormie] = useState<NormieCharacter | null>(null)
   const [joinCode, setJoinCode] = useState('')
+  const [joinCodeConfirmed, setJoinCodeConfirmed] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [pendingMode, setPendingMode] = useState<'solo' | 'party'>('solo')
 
+  useEffect(() => {
+    if (!userLoading && !user) router.push('/')
+  }, [userLoading, user])
+
   function handleModeSelect(mode: 'solo' | 'party') {
     setPendingMode(mode)
-    if (mode === 'join') {
-      setStep('join_code')
-    } else {
-      setStep('select_normie')
-    }
-  }
-
-  async function handleNormieSelected(normie: NormieCharacter) {
-    setSelectedNormie(normie)
+    setStep('select_normie')
   }
 
   async function handleStartGame() {
@@ -46,13 +43,9 @@ export default function LobbyPage() {
     }
 
     const added = await addPlayerToSession(
-      session.id,
-      user.id,
-      selectedNormie.id,
-      selectedNormie.characterClass,
-      selectedNormie.stats,
-      selectedNormie.maxHp,
-      1
+      session.id, user.id, selectedNormie.id,
+      selectedNormie.characterClass, selectedNormie.stats,
+      selectedNormie.maxHp, 1
     )
 
     if (!added) {
@@ -61,7 +54,11 @@ export default function LobbyPage() {
       return
     }
 
-    router.push(`/game/${session.id}`)
+    if (pendingMode === 'party') {
+      router.push(`/party/${session.id}`)
+    } else {
+      router.push(`/game/${session.id}`)
+    }
   }
 
   async function handleJoinSession() {
@@ -71,14 +68,20 @@ export default function LobbyPage() {
 
     const session = await joinSession(joinCode)
     if (!session) {
-      setError('Session not found or already started.')
+      setError('Session not found or already started. Check the code and try again.')
       setLoading(false)
       return
     }
 
-    const players = await import('@/lib/sessions').then(m => m.getSessionPlayers(session.id))
-    const turnOrder = players.length + 1
+    const players = await getSessionPlayers(session.id)
+    const alreadyIn = players.find((p: { user_id: string }) => p.user_id === user.id)
 
+    if (alreadyIn) {
+      router.push(`/party/${session.id}`)
+      return
+    }
+
+    const turnOrder = players.length + 1
     if (turnOrder > 4) {
       setError('This session is full.')
       setLoading(false)
@@ -86,13 +89,9 @@ export default function LobbyPage() {
     }
 
     const added = await addPlayerToSession(
-      session.id,
-      user.id,
-      selectedNormie.id,
-      selectedNormie.characterClass,
-      selectedNormie.stats,
-      selectedNormie.maxHp,
-      turnOrder
+      session.id, user.id, selectedNormie.id,
+      selectedNormie.characterClass, selectedNormie.stats,
+      selectedNormie.maxHp, turnOrder
     )
 
     if (!added) {
@@ -101,16 +100,18 @@ export default function LobbyPage() {
       return
     }
 
-    router.push(`/game/${session.id}`)
+    router.push(`/party/${session.id}`)
   }
 
-  if (!user) {
+  if (userLoading) {
     return (
       <main className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <p className="text-zinc-400">Loading...</p>
       </main>
     )
   }
+
+  if (!user) return null
 
   return (
     <main className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
@@ -147,26 +148,19 @@ export default function LobbyPage() {
           </div>
         )}
 
-        {/* Step 2 — Select Normie */}
+        {/* Step 2 — Select Normie (solo/create party) */}
         {step === 'select_normie' && !selectedNormie && (
           <div>
-            <button
-              onClick={() => setStep('choose_mode')}
-              className="text-zinc-500 text-sm mb-6 hover:text-zinc-300 transition-colors"
-            >
+            <button onClick={() => setStep('choose_mode')} className="text-zinc-500 text-sm mb-6 hover:text-zinc-300 transition-colors">
               ← Back
             </button>
-            <NormieSelector onSelect={handleNormieSelected} />
+            <NormieSelector onSelect={setSelectedNormie} />
           </div>
         )}
 
-        {/* Step 2b — Confirm Normie */}
         {step === 'select_normie' && selectedNormie && (
           <div>
-            <button
-              onClick={() => setSelectedNormie(null)}
-              className="text-zinc-500 text-sm mb-6 hover:text-zinc-300 transition-colors"
-            >
+            <button onClick={() => setSelectedNormie(null)} className="text-zinc-500 text-sm mb-6 hover:text-zinc-300 transition-colors">
               ← Choose different Normie
             </button>
             <CharacterSheet normie={selectedNormie} />
@@ -181,53 +175,69 @@ export default function LobbyPage() {
           </div>
         )}
 
-        {/* Step 3 — Join with code */}
-        {step === 'join_code' && !selectedNormie && (
+        {/* Step 3 — Join flow (code + normie selection stays in join_code step) */}
+        {step === 'join_code' && (
           <div>
             <button
-              onClick={() => setStep('choose_mode')}
+              onClick={() => { setStep('choose_mode'); setJoinCodeConfirmed(false); setSelectedNormie(null) }}
               className="text-zinc-500 text-sm mb-6 hover:text-zinc-300 transition-colors"
             >
               ← Back
             </button>
-            <h2 className="text-white text-xl font-bold mb-2">Enter Invite Code</h2>
-            <p className="text-zinc-400 text-sm mb-6">Ask your party host for their 6-character code.</p>
-            <input
-              type="text"
-              placeholder="NRM-XXX"
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              maxLength={7}
-              className="w-full bg-zinc-800 border border-zinc-600 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 mb-4 font-mono text-lg tracking-widest"
-            />
-            <button
-              onClick={() => setStep('select_normie')}
-              disabled={joinCode.length < 7}
-              className="w-full bg-white text-black font-semibold py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-40 transition-colors"
-            >
-              Find Session
-            </button>
-          </div>
-        )}
 
-        {/* Join — confirm normie then join */}
-        {step === 'join_code' && selectedNormie && (
-          <div>
-            <button
-              onClick={() => setSelectedNormie(null)}
-              className="text-zinc-500 text-sm mb-6 hover:text-zinc-300 transition-colors"
-            >
-              ← Choose different Normie
-            </button>
-            <CharacterSheet normie={selectedNormie} />
-            {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
-            <button
-              onClick={handleJoinSession}
-              disabled={loading}
-              className="w-full mt-4 bg-white text-black font-semibold py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-40 transition-colors"
-            >
-              {loading ? 'Joining...' : 'Join Dungeon'}
-            </button>
+            {/* Enter code */}
+            {!joinCodeConfirmed && (
+              <>
+                <h2 className="text-white text-xl font-bold mb-2">Enter Invite Code</h2>
+                <p className="text-zinc-400 text-sm mb-6">Ask your party host for their 6-character code.</p>
+                <input
+                  type="text"
+                  placeholder="NRM-XXX"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  maxLength={7}
+                  className="w-full bg-zinc-800 border border-zinc-600 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 mb-4 font-mono text-lg tracking-widest"
+                />
+                <button
+                  onClick={() => setJoinCodeConfirmed(true)}
+                  disabled={joinCode.length < 7}
+                  className="w-full bg-white text-black font-semibold py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-40 transition-colors"
+                >
+                  Find Session
+                </button>
+              </>
+            )}
+
+            {/* Select Normie for join */}
+            {joinCodeConfirmed && !selectedNormie && (
+              <>
+                <p className="text-zinc-400 text-sm mb-2">
+                  Joining session <span className="text-white font-mono">{joinCode}</span>
+                </p>
+                <NormieSelector onSelect={setSelectedNormie} />
+              </>
+            )}
+
+            {/* Confirm and join */}
+            {joinCodeConfirmed && selectedNormie && (
+              <>
+                <p className="text-zinc-400 text-sm mb-4">
+                  Joining session <span className="text-white font-mono">{joinCode}</span>
+                </p>
+                <button onClick={() => setSelectedNormie(null)} className="text-zinc-500 text-sm mb-6 hover:text-zinc-300 transition-colors">
+                  ← Choose different Normie
+                </button>
+                <CharacterSheet normie={selectedNormie} />
+                {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
+                <button
+                  onClick={handleJoinSession}
+                  disabled={loading}
+                  className="w-full mt-4 bg-white text-black font-semibold py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-40 transition-colors"
+                >
+                  {loading ? 'Joining...' : 'Join Dungeon'}
+                </button>
+              </>
+            )}
           </div>
         )}
 

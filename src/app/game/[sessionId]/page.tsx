@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useUser } from '@/hooks/useUser'
 import Image from 'next/image'
+import { DiceRoll } from '@/components/game/DiceRoll'
+
 
 interface Message {
     id: string
@@ -53,6 +55,13 @@ export default function GameRoom() {
     const [action, setAction] = useState('')
     const [loading, setLoading] = useState(true)
     const [submitting, setSubmitting] = useState(false)
+    const [pendingDiceRoll, setPendingDiceRoll] = useState<{
+        roll: number
+        modifier: number
+        total: number
+        stat: string
+    } | null>(null)
+
     const [initializing, setInitializing] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -293,6 +302,15 @@ export default function GameRoom() {
 
         const result = await res.json()
 
+        if (result.diceRoll) {
+            setPendingDiceRoll({
+                roll: result.diceRoll,
+                modifier: result.modifier,
+                total: result.total,
+                stat: result.stat,
+            })
+        }
+
         await supabase.from('messages').insert({
             session_id: sessionId,
             type: 'dm_narration',
@@ -428,10 +446,10 @@ export default function GameRoom() {
                             <div
                                 key={p.id}
                                 className={`rounded-xl p-3 border transition-colors ${!p.isActive
-                                        ? 'border-zinc-800 bg-zinc-900 opacity-50'
-                                        : p.id === currentTurnPlayerId
-                                            ? 'border-white bg-zinc-800'
-                                            : 'border-zinc-700 bg-zinc-900'
+                                    ? 'border-zinc-800 bg-zinc-900 opacity-50'
+                                    : p.id === currentTurnPlayerId
+                                        ? 'border-white bg-zinc-800'
+                                        : 'border-zinc-700 bg-zinc-900'
                                     }`}
                             >
                                 <div className="flex items-center gap-2 mb-2">
@@ -457,8 +475,8 @@ export default function GameRoom() {
                                 <div className="w-full bg-zinc-700 rounded-full h-1.5">
                                     <div
                                         className={`h-1.5 rounded-full transition-all ${!p.isActive ? 'bg-zinc-600' :
-                                                p.hp / p.maxHp > 0.5 ? 'bg-green-500' :
-                                                    p.hp / p.maxHp > 0.25 ? 'bg-yellow-500' : 'bg-red-500'
+                                            p.hp / p.maxHp > 0.5 ? 'bg-green-500' :
+                                                p.hp / p.maxHp > 0.25 ? 'bg-yellow-500' : 'bg-red-500'
                                             }`}
                                         style={{ width: `${(p.hp / p.maxHp) * 100}%` }}
                                     />
@@ -468,7 +486,7 @@ export default function GameRoom() {
                                     <p className="text-white text-xs mt-1 font-medium">← Turn</p>
                                 )}
                             </div>
-                        ))} 
+                        ))}
                     </div>
                 </div>
 
@@ -539,6 +557,18 @@ export default function GameRoom() {
                     </div>
                 </div>
             </div>
+
+            {pendingDiceRoll && (
+                <DiceRoll
+                    roll={pendingDiceRoll.roll}
+                    modifier={pendingDiceRoll.modifier}
+                    total={pendingDiceRoll.total}
+                    stat={pendingDiceRoll.stat}
+                    onComplete={() => setPendingDiceRoll(null)}
+                />
+            )}
         </main>
+
+
     )
 }

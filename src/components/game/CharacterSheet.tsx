@@ -21,7 +21,8 @@ const STAT_LABELS: Record<string, string> = {
 
 function mod(val: number): string {
   const m = Math.floor((val - 10) / 2)
-  return m >= 0 ? `+${m}` : `${m}`
+  if (m === 0) return '+0'
+  return m > 0 ? `+${m}` : `${m}`
 }
 
 export function CharacterSheet({ normie, onConfirm }: { normie: NormieCharacter; onConfirm?: () => void }) {

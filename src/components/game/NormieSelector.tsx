@@ -6,12 +6,15 @@ import { useWalletNormies } from '@/hooks/useWalletNormies'
 import { CharacterSheet } from './CharacterSheet'
 import { NormieCharacter } from '@/types/normie'
 import { useAccount } from 'wagmi'
+import { motion } from 'framer-motion'
 
-export function NormieSelector({
-  onSelect,
-}: {
-  onSelect: (normie: NormieCharacter) => void
-}) {
+const C = {
+  bg: '#0d0d0f', panel: '#13131a', panelMid: '#1a1a24',
+  border: '#252535', gold: '#c8a85c', goldDim: '#4a3f25',
+  text: '#e8e0d0', textDim: '#a09080', textMuted: '#504840', red: '#dc2626',
+}
+
+export function NormieSelector({ onSelect }: { onSelect: (normie: NormieCharacter) => void }) {
   const [tab, setTab] = useState<'id' | 'wallet'>('id')
   const [input, setInput] = useState('')
   const { normie, loading, error, fetchNormie } = useNormie()
@@ -19,64 +22,57 @@ export function NormieSelector({
   const { isConnected } = useAccount()
 
   return (
-    <div className="w-full max-w-md">
-      <h2 className="text-white text-xl font-bold mb-2">Choose Your Normie</h2>
-      <p className="text-zinc-400 text-sm mb-6">
-        Enter any Normie ID or pick one you own.
-      </p>
+    <div style={{ width: '100%', maxWidth: '480px', fontFamily: "'IBM Plex Mono', monospace" }}>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-        <button
-          onClick={() => setTab('id')}
-          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-            tab === 'id'
-              ? 'bg-white text-black'
-              : 'bg-zinc-800 text-zinc-400 hover:text-white'
-          }`}
-        >
-          Enter ID
-        </button>
-        <button
-          onClick={() => setTab('wallet')}
-          disabled={!isConnected}
-          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-            tab === 'wallet'
-              ? 'bg-white text-black'
-              : 'bg-zinc-800 text-zinc-400 hover:text-white'
-          } disabled:opacity-40 disabled:cursor-not-allowed`}
-        >
-          My Normies {!isConnected && '(connect wallet)'}
-        </button>
+      <div style={{ display: 'flex', gap: '1px', background: C.border, marginBottom: '20px' }}>
+        {[
+          { id: 'id', label: 'ENTER ID' },
+          { id: 'wallet', label: isConnected ? 'MY NORMIES' : 'MY NORMIES (CONNECT WALLET)' },
+        ].map(t => (
+          <button key={t.id}
+            onClick={() => setTab(t.id as 'id' | 'wallet')}
+            disabled={t.id === 'wallet' && !isConnected}
+            style={{
+              flex: 1, padding: '10px', background: tab === t.id ? C.panelMid : C.panel,
+              border: 'none', color: tab === t.id ? C.gold : C.textMuted,
+              cursor: t.id === 'wallet' && !isConnected ? 'not-allowed' : 'pointer',
+              fontSize: '10px', letterSpacing: '0.15em', fontFamily: "'IBM Plex Mono', monospace",
+              borderBottom: tab === t.id ? `2px solid ${C.gold}` : '2px solid transparent',
+              transition: 'all 0.2s',
+            }}>
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {/* Enter ID tab */}
       {tab === 'id' && (
-        <div className="space-y-4">
-          <div className="flex gap-2">
+        <div>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
             <input
-              type="number"
-              placeholder="Normie ID (e.g. 42)"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && fetchNormie(input)}
-              className="flex-1 bg-zinc-800 border border-zinc-600 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
-              min="1"
-              max="10000"
+              type="number" placeholder="Normie ID (e.g. 42)"
+              value={input} onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && fetchNormie(input)}
+              min="1" max="10000"
+              style={{ flex: 1, background: C.panelMid, border: `1px solid ${C.border}`, color: C.text, padding: '12px 14px', fontSize: '13px', fontFamily: "'IBM Plex Mono', monospace", outline: 'none' }}
             />
-            <button
-              onClick={() => fetchNormie(input)}
-              disabled={!input || loading}
-              className="bg-white text-black font-semibold px-4 py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? '...' : 'Search'}
-            </button>
+            <motion.button whileTap={{ scale: 0.97 }}
+              onClick={() => fetchNormie(input)} disabled={!input || loading}
+              style={{ background: !input || loading ? C.panelMid : C.gold, border: 'none', color: !input || loading ? C.textMuted : '#0d0d0f', padding: '12px 20px', cursor: !input || loading ? 'not-allowed' : 'pointer', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', fontFamily: 'Cinzel, serif' }}>
+              {loading ? '...' : 'SEARCH'}
+            </motion.button>
           </div>
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && (
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              style={{ color: C.red, fontSize: '11px', marginBottom: '12px', letterSpacing: '0.05em' }}>{error}</motion.p>
+          )}
 
           {normie && (
-            <CharacterSheet normie={normie} onConfirm={() => onSelect(normie)} />
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <CharacterSheet normie={normie} onConfirm={() => onSelect(normie)} />
+            </motion.div>
           )}
         </div>
       )}
@@ -85,21 +81,24 @@ export function NormieSelector({
       {tab === 'wallet' && (
         <div>
           {walletLoading && (
-            <p className="text-zinc-400 text-sm">Loading your Normies...</p>
+            <motion.p animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5 }}
+              style={{ color: C.textDim, fontSize: '11px', letterSpacing: '0.1em', textAlign: 'center', padding: '24px' }}>
+              LOADING YOUR NORMIES...
+            </motion.p>
           )}
           {!walletLoading && normieIds.length === 0 && (
-            <p className="text-zinc-400 text-sm">No Normies found in this wallet.</p>
+            <div style={{ textAlign: 'center', padding: '32px', border: `1px dashed ${C.border}` }}>
+              <p style={{ color: C.textMuted, fontSize: '11px', letterSpacing: '0.1em' }}>NO NORMIES FOUND IN THIS WALLET</p>
+            </div>
           )}
           {!walletLoading && normieIds.length > 0 && (
-            <div className="grid grid-cols-4 gap-2">
-              {normieIds.map((id) => (
-                <button
-                  key={id}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+              {normieIds.map(id => (
+                <motion.button key={id} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={() => { setTab('id'); setInput(id); fetchNormie(id) }}
-                  className="bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-zinc-300 text-sm hover:border-zinc-400 transition-colors"
-                >
+                  style={{ background: C.panelMid, border: `1px solid ${C.border}`, color: C.textDim, padding: '8px', cursor: 'pointer', fontSize: '11px', fontFamily: "'IBM Plex Mono', monospace" }}>
                   #{id}
-                </button>
+                </motion.button>
               ))}
             </div>
           )}

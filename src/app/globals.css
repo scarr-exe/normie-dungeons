@@ -2,8 +2,29 @@
 
 /*@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');*/
 
-
+html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
+  background: #0d0d0f;
+}
+
+/* Custom Scrollbar for panels */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #13131a; /* panel background */
+  border-left: 1px solid #252535;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #4a3f25; /* dim gold */
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #c8a85c; /* bright gold */
 }

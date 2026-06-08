@@ -41,7 +41,7 @@ export function useUser() {
         .from("users")
         .select("*")
         .eq("wallet_address", address.toLowerCase())
-        .maybeSingle()
+        .maybeSingle();
 
       if (data) {
         // Check holder status and update badge
@@ -69,7 +69,7 @@ export function useUser() {
       .from("users")
       .select("*")
       .eq("session_token", token)
-      .maybeSingle()
+      .maybeSingle();
 
     if (data) {
       setUser(data);
@@ -94,29 +94,36 @@ export function useUser() {
       localStorage.setItem("normie_session_token", token);
     }
 
-    const { data, error } = await supabase
-      .from("users")
-      .insert({
-        username,
-        wallet_address: walletAddress,
-        badge,
-        session_token: token,
-      })
-      .select()
-      .single();
+    const tryInsert = async (sessionToken: string) => {
+      return await supabase
+        .from("users")
+        .insert({
+          username,
+          wallet_address: walletAddress,
+          badge,
+          session_token: sessionToken,
+        })
+        .select()
+        .single();
+    };
+
+    let { data, error } = await tryInsert(token);
+
+    // If session token already exists, generate a fresh one and retry
+    if (error?.code === "23505") {
+      const freshToken = generateSessionToken();
+      localStorage.setItem("normie_session_token", freshToken);
+      const retry = await tryInsert(freshToken);
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) {
-      console.error(
-        "Supabase insert error:",
-        error.message,
-        error.details,
-        error.hint,
-      );
+      console.error("Supabase insert error:", error.message);
       return null;
     }
 
     if (!data) return null;
-
     setUser(data);
     return data;
   }

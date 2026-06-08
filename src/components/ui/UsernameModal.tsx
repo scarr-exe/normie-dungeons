@@ -53,7 +53,31 @@ export function UsernameModal({ onComplete }: { onComplete: () => void }) {
           </p>
 
           <div style={{ marginBottom: '20px' }}>
-            <ConnectButton />
+            <ConnectButton.Custom>
+              {({ account, chain, openAccountModal, openChainModal, openConnectModal, mounted }) => {
+                const connected = mounted && account && chain
+                return (
+                  <div style={{ width: '100%' }}>
+                    {!connected ? (
+                      <button onClick={openConnectModal}
+                        style={{ width: '100%', background: 'transparent', border: `1px solid ${C.goldDim}`, color: C.gold, padding: '12px 16px', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.15em', fontFamily: 'Cinzel, serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                        ⚔ CONNECT WALLET
+                      </button>
+                    ) : chain.unsupported ? (
+                      <button onClick={openChainModal}
+                        style={{ width: '100%', background: 'transparent', border: `1px solid #dc2626`, color: '#dc2626', padding: '12px 16px', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.15em', fontFamily: 'Cinzel, serif' }}>
+                        WRONG NETWORK — SWITCH CHAIN
+                      </button>
+                    ) : (
+                      <button onClick={openAccountModal}
+                        style={{ width: '100%', background: C.panelMid, border: `1px solid ${C.gold}`, color: C.gold, padding: '12px 16px', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.1em', fontFamily: 'Cinzel, serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                        ✓ {account.displayName}
+                      </button>
+                    )}
+                  </div>
+                )
+              }}
+            </ConnectButton.Custom>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>

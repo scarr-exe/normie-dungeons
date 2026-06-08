@@ -311,10 +311,10 @@ export default function GameRoom() {
 
   if (loading || initializing) {
     return (
-      <div style={{ minHeight: '100vh', background: C.bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+      <div style={{ height: '100vh', background: '#0d0d0f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
         <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 2 }}
           style={{ fontSize: '32px' }}>⚔</motion.div>
-        <p style={{ fontFamily: 'Cinzel, serif', fontSize: '14px', color: C.gold, letterSpacing: '0.2em' }}>
+        <p style={{ fontFamily: 'Cinzel, serif', fontSize: '14px', color: '#c8a85c', letterSpacing: '0.2em' }}>
           {initializing ? 'THE DUNGEON MASTER PREPARES...' : 'ENTERING THE DUNGEON...'}
         </p>
       </div>
@@ -322,7 +322,7 @@ export default function GameRoom() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: C.bg, color: C.text, fontFamily: "'IBM Plex Mono', monospace", display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100vh', overflow: 'hidden', background: C.bg, color: C.text, fontFamily: "'IBM Plex Mono', monospace", display: 'flex', flexDirection: 'column' }}>
 
       {/* Top Bar */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
@@ -362,14 +362,14 @@ export default function GameRoom() {
       </motion.div>
 
       {/* Main 3-panel layout */}
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0, height: 0 }}>
 
         {/* LEFT PANEL */}
         <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-          style={{ width: '260px', flexShrink: 0, borderRight: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', background: C.panel, overflow: 'hidden' }}>
+          style={{ width: '260px', flexShrink: 0, borderRight: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', background: C.panel, overflow: 'hidden', minHeight: 0 }}>
 
           {/* Party list */}
-          <div style={{ padding: '16px', borderBottom: `1px solid ${C.border}`, overflowY: 'auto' }}>
+          <div className="custom-scrollbar" style={{ padding: '16px', borderBottom: `1px solid ${C.border}`, overflowY: 'auto', minHeight: 0, height: 0, flex: 1 }}>
             <SectionDivider title="PARTY" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {players.map(p => (
@@ -407,7 +407,7 @@ export default function GameRoom() {
 
           {/* Character stat block */}
           {myPlayer && (
-            <div style={{ padding: '16px', overflowY: 'auto', flex: 1 }}>
+            <div className="custom-scrollbar" style={{ padding: '16px', overflowY: 'auto', flex: 1 }}>
               <SectionDivider title="YOUR CHARACTER" />
               <div style={{ marginBottom: '12px' }}>
                 <p style={{ fontSize: '13px', fontWeight: 700, color: C.text, margin: '0 0 2px', fontFamily: 'Cinzel, serif' }}>{myPlayer.username}</p>
@@ -432,11 +432,11 @@ export default function GameRoom() {
                   <p style={{ fontSize: '9px', color: C.gold, letterSpacing: '0.1em', margin: '0 0 4px' }}>PASSIVE</p>
                   <p style={{ fontSize: '10px', color: C.textDim, margin: 0, lineHeight: 1.5 }}>
                     {myPlayer.characterClass === 'Warrior' ? 'Stalwart — Reduced damage from physical hits' :
-                     myPlayer.characterClass === 'Rogue' ? 'Shadow Step — Higher critical hit chance' :
-                     myPlayer.characterClass === 'Mage' ? 'Arcane Surge — Spells deal bonus damage at full HP' :
-                     myPlayer.characterClass === 'Ranger' ? 'Eagle Eye — Advantage on perception checks' :
-                     myPlayer.characterClass === 'Bard' ? 'Inspire — Allies get +1 on their next roll' :
-                     'Adapt — Bonus to rolls when below half HP'}
+                      myPlayer.characterClass === 'Rogue' ? 'Shadow Step — Higher critical hit chance' :
+                        myPlayer.characterClass === 'Mage' ? 'Arcane Surge — Spells deal bonus damage at full HP' :
+                          myPlayer.characterClass === 'Ranger' ? 'Eagle Eye — Advantage on perception checks' :
+                            myPlayer.characterClass === 'Bard' ? 'Inspire — Allies get +1 on their next roll' :
+                              'Adapt — Bonus to rolls when below half HP'}
                   </p>
                 </div>
               )}
@@ -526,7 +526,7 @@ export default function GameRoom() {
 
         {/* RIGHT PANEL */}
         <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
-          style={{ width: '260px', flexShrink: 0, borderLeft: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', background: C.panel, overflow: 'hidden' }}>
+          style={{ width: '260px', flexShrink: 0, borderLeft: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', background: C.panel, overflow: 'hidden', minHeight: 0 }}>
 
           {/* Turn order */}
           <div style={{ padding: '16px', borderBottom: `1px solid ${C.border}` }}>
@@ -534,7 +534,7 @@ export default function GameRoom() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {activePlayers.map((p, i) => (
                 <motion.div key={p.id}
-                  animate={{ background: p.id === currentTurnPlayerId ? C.goldDim : 'transparent' }}
+                  animate={{ background: p.id === currentTurnPlayerId ? C.goldDim : 'rgba(0,0,0,0)' }}
                   style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 8px', borderRadius: '2px', border: `1px solid ${p.id === currentTurnPlayerId ? C.gold : 'transparent'}` }}>
                   <span style={{ fontSize: '11px', color: C.gold, fontFamily: 'Cinzel, serif', width: '16px' }}>{i + 1}</span>
                   <Image src={`https://api.normies.art/normie/${p.normieId}/image.png`} alt="" width={24} height={24}
@@ -552,7 +552,7 @@ export default function GameRoom() {
           </div>
 
           {/* Activity log */}
-          <div style={{ flex: 1, padding: '16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="custom-scrollbar" style={{ flex: 1, padding: '16px', overflowY: 'scroll', display: 'flex', flexDirection: 'column', gap: '8px', minHeight: 0, height: 0 }}>
             <SectionDivider title="ACTIVITY LOG" />
             <AnimatePresence>
               {messages.map(m => (

@@ -19,7 +19,7 @@ export async function createSession(
       status: 'lobby',
       mode,
       current_room: 1,
-      total_rooms: 6,
+      total_rooms: 3,
     })
     .select()
     .single()

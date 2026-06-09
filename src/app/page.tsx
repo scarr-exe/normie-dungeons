@@ -49,6 +49,7 @@ export default function LandingPage() {
   const [tutorialDone, setTutorialDone] = useState(false)
   const [normieImages, setNormieImages] = useState<string[]>([])
   const [normieClasses, setNormieClasses] = useState<Record<string, string>>({})
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
     const done = localStorage.getItem('tutorial_complete')
@@ -134,19 +135,40 @@ export default function LandingPage() {
     <main style={{ background: C.bg, color: C.text, minHeight: '100vh', fontFamily: "'IBM Plex Mono', monospace" }}>
 
       {/* Nav */}
-      <nav style={{ borderBottom: `1px solid ${C.border}`, padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.panel }}>
+      <nav style={{ borderBottom: `1px solid ${C.border}`, padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.panel, position: 'relative', zIndex: 50 }}>
         <span style={{ fontFamily: 'Cinzel, serif', fontSize: '13px', color: C.gold, letterSpacing: '0.1em' }}>⚔ NORMIE DUNGEONS</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+        
+        {/* Desktop Nav */}
+        <div className="hidden md:flex" style={{ alignItems: 'center', gap: '24px' }}>
           <a href="https://normies.art" target="_blank" rel="noopener noreferrer" style={{ fontSize: '11px', color: C.textMuted, textDecoration: 'none', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Normies.art</a>
           <button onClick={handlePlay} style={{ ...btnOutline, padding: '8px 16px' }}>
             {loading ? '...' : user ? (tutorialDone ? 'Continue' : 'Play') : 'Play'}
           </button>
         </div>
+
+        {/* Mobile Nav Hamburger */}
+        <button 
+          className="md:hidden block" 
+          style={{ background: 'none', border: 'none', color: C.gold, fontSize: '24px', cursor: 'pointer', padding: '0 8px' }}
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          ☰
+        </button>
       </nav>
+
+      {/* Mobile Nav Menu */}
+      {isMenuOpen && (
+        <div style={{ position: 'absolute', top: '53px', left: 0, right: 0, background: C.panel, borderBottom: `1px solid ${C.border}`, padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', zIndex: 40, alignItems: 'center' }}>
+          <a href="https://normies.art" target="_blank" rel="noopener noreferrer" onClick={() => setIsMenuOpen(false)} style={{ fontSize: '12px', color: C.textDim, textDecoration: 'none', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Normies.art</a>
+          <button onClick={() => { setIsMenuOpen(false); handlePlay(); }} style={{ ...btnOutline, padding: '12px 32px', width: '100%', maxWidth: '200px' }}>
+            {loading ? '...' : user ? (tutorialDone ? 'Continue' : 'Play') : 'Play'}
+          </button>
+        </div>
+      )}
 
       {/* Hero */}
       <section style={{ position: 'relative', borderBottom: `1px solid ${C.border}`, overflow: 'hidden' }}>
-        <div style={{ padding: '128px 32px', textAlign: 'center', position: 'relative', zIndex: 10 }}>
+        <div className="hero-padding" style={{ textAlign: 'center', position: 'relative', zIndex: 10 }}>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} style={{ fontSize: '13px', color: C.textMuted, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '24px' }}>Built on Normies · Powered by AI</motion.p>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ fontFamily: 'Cinzel, serif', fontSize: 'clamp(40px, 8vw, 80px)', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '24px', lineHeight: 1.1, color: C.text }}>
             NORMIE<br />DUNGEONS
@@ -171,14 +193,14 @@ export default function LandingPage() {
 
       {/* What is it */}
       <section style={{ borderBottom: `1px solid ${C.border}`, padding: '80px 32px' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '64px', alignItems: 'center' }}>
+        <div className="landing-grid-2" style={{ maxWidth: '900px', margin: '0 auto', gap: '64px', alignItems: 'center' }}>
           <div>
             <p style={{ fontSize: '11px', color: C.orange, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>WHAT IS NORMIE DUNGEONS?</p>
             <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: '24px', color: C.text, marginBottom: '24px', lineHeight: 1.3 }}>YOUR NFT.<br />YOUR CHARACTER.</h2>
             <p style={{ fontSize: '15px', color: C.textDim, lineHeight: 1.8, marginBottom: '16px' }}>Normie Dungeons turns your on-chain NFT into a D&D character. Each Normie's traits map directly to stats like WIS, CHA, STR, and DEX.</p>
             <p style={{ fontSize: '15px', color: C.textDim, lineHeight: 1.8 }}>No Normie? Use any token ID. Holders get a verified badge.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+          <div className="landing-grid-3-mobile" style={{ gap: '8px' }}>
             {normieImages.slice(0, 6).map((id, i) => (
               <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
                 style={{ border: `1px solid ${C.border}`, background: C.panel, padding: '8px', aspectRatio: '1', position: 'relative' }}>
@@ -198,7 +220,7 @@ export default function LandingPage() {
       <section style={{ borderBottom: `1px solid ${C.border}`, padding: '80px 32px' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <p style={{ fontSize: '11px', color: C.orange, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '48px', textAlign: 'center' }}>FEATURES</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: C.border }}>
+          <div className="landing-grid-2" style={{ gap: '1px', background: C.border }}>
             {FEATURES.map((f, i) => (
               <div key={i} style={{ background: C.bg, padding: '32px' }}>
                 <p style={{ fontSize: '12px', color: C.textMuted, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>{f.label}</p>
@@ -214,7 +236,7 @@ export default function LandingPage() {
       <section style={{ borderBottom: `1px solid ${C.border}`, padding: '80px 32px' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <p style={{ fontSize: '11px', color: C.orange, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '48px', textAlign: 'center' }}>HOW IT WORKS</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: C.border }}>
+          <div className="landing-grid-3" style={{ gap: '1px', background: C.border }}>
             {STEPS.map((s, i) => (
               <div key={i} style={{ background: C.bg, padding: '32px' }}>
                 <p style={{ fontFamily: 'Cinzel, serif', fontSize: '32px', color: C.border, marginBottom: '16px' }}>{s.num}</p>
@@ -228,7 +250,7 @@ export default function LandingPage() {
 
       {/* Stats */}
       <section style={{ borderBottom: `1px solid ${C.border}`, padding: '48px 32px' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: C.border }}>
+        <div className="landing-grid-3" style={{ maxWidth: '900px', margin: '0 auto', gap: '1px', background: C.border }}>
           {STATS.map((s, i) => (
             <div key={i} style={{ background: C.bg, padding: '32px', textAlign: 'center' }}>
               <p style={{ fontFamily: 'Cinzel, serif', fontSize: '32px', color: C.text, marginBottom: '8px' }}>{s.num}</p>

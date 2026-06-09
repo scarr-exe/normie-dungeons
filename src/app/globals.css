@@ -28,3 +28,63 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #c8a85c; /* bright gold */
 }
+
+/* Landing page responsive grids */
+.landing-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .landing-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.landing-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .landing-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.landing-grid-3-mobile {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (min-width: 480px) {
+  .landing-grid-3-mobile {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.hero-padding {
+  padding: 64px 16px;
+}
+@media (min-width: 768px) {
+  .hero-padding {
+    padding: 128px 32px;
+  }
+}
+
+.desktop-nav {
+  display: none;
+}
+.mobile-nav-toggle {
+  display: block;
+  background: none;
+  border: none;
+  color: #c8a85c;
+  font-size: 24px;
+  cursor: pointer;
+}
+@media (min-width: 768px) {
+  .desktop-nav {
+    display: flex;
+  }
+  .mobile-nav-toggle {
+    display: none;
+  }
+}

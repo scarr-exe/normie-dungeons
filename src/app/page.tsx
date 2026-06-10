@@ -13,11 +13,12 @@ import Image from 'next/image'
 const C = { bg: '#0d0d0f', panel: '#13131a', border: '#252535', gold: '#c8a85c', goldDim: '#4a3f25', text: '#e8e0d0', textDim: '#a09080', textMuted: '#504840', orange: '#e8642a' }
 
 const SHOWCASE_NORMIES = ['1', '42', '100', '420', '999', '1337', '4200', '8888', '5555', '2077', '7777', '3333']
-const FEATURES = [
-  { title: 'EVERY RUN IS UNIQUE', desc: 'The Dungeon Master narrates your adventure in real time, responding to every decision you make. No two dungeons are the same.' },
-  { title: 'YOUR NORMIE IS YOUR CHARACTER', desc: "Eyes, expression, hair, accessories. Every trait maps to a D&D stat. Your Normie's traits determine your class." },
-  { title: 'MULTIPLE THEMES', desc: 'Fantasy dungeons, zombie apocalypses, sci-fi facilities, detective agencies — the Dungeon Master picks a theme and builds your world.' },
-  { title: 'FACE IT ALONE OR WITH FRIENDS', desc: 'Solo runs or party dungeons with up to 4 adventurers. Share an invite code and explore the same dungeon together.' },
+type FeatureItem = { label?: string; title: string; desc: string }
+const FEATURES: FeatureItem[] = [
+  { label: 'AI DUNGEON MASTER', title: 'EVERY RUN IS UNIQUE', desc: 'The Dungeon Master narrates your adventure in real time, responding to every decision you make. No two dungeons are the same.' },
+  { label: 'TRAIT-BASED STATS', title: 'YOUR NORMIE IS YOUR CHARACTER', desc: "Eyes, expression, hair, accessories — every trait maps to a D&D stat. Your Normie's traits determine your class." },
+  { label: '30+ THEMES', title: 'MULTIPLE THEMES', desc: 'Fantasy dungeons, zombie apocalypses, sci-fi facilities, detective agencies — the Dungeon Master picks a theme and builds your world.' },
+  { label: 'SOLO & PARTY', title: 'FACE IT ALONE OR WITH FRIENDS', desc: 'Solo runs or party dungeons with up to 4 adventurers. Share an invite code and explore the same dungeon together.' },
 ]
 const STEPS = [
   { num: '01', title: 'ENTER YOUR NORMIE', desc: 'Connect your wallet or enter any Normie ID. Your traits become your stats.' },

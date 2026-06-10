@@ -124,4 +124,35 @@ Open a PR or issue in this repository for changes, or reach out to the maintaine
 
 ---
 
-Last update: automatically generated from repository files.
+## Repository layout
+
+```
+normie-dungeons/
+├─ README.md
+├─ package.json
+├─ next.config.ts
+├─ postcss.config.mjs
+├─ tsconfig.json
+├─ public/
+│  └─ (static assets)
+└─ src/
+  ├─ app/
+  │  ├─ page.tsx                # Landing page
+  │  ├─ layout.tsx
+  │  ├─ globals.css
+  │  ├─ api/
+  │  │  ├─ dm/
+  │  │  │  ├─ init/route.ts     # DM init endpoint
+  │  │  │  └─ turn/route.ts     # DM turn endpoint
+  │  │  ├─ claude/tutorial-demo/route.ts
+  │  │  └─ normies/test/route.ts
+  │  ├─ lobby/
+  │  └─ game/
+  │     └─ [sessionId]/page.tsx # Game room UI
+  ├─ components/
+  │  ├─ game/                   # CharacterSheet, DiceRoll, NormieSelector
+  │  └─ ui/                     # UsernameModal, etc.
+  ├─ hooks/                     # useUser, useNormie, useWalletNormies
+  ├─ lib/                       # ai.ts, normies.ts, sessions.ts, supabase.ts
+  └─ types/                     # game.ts, normie.ts
+```

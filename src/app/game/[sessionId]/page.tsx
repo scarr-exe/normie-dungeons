@@ -12,6 +12,7 @@ const C = {
   bg: '#0d0d0f',
   panel: '#13131a',
   panelMid: '#1a1a24',
+  parchment: '#1a1508',
   border: '#252535',
   gold: '#c8a85c',
   goldDim: '#4a3f25',
@@ -207,13 +208,24 @@ export default function GameRoom() {
         id: string; type: string; content: string
         dice_roll: { result: number; modifier: number; total: number; stat: string } | null
         created_at: string; session_players: { users: { username: string } } | null
-      }) => ({
-        id: m.id, type: m.type, content: m.content,
-        username: m.session_players?.users?.username,
-        diceRoll: m.dice_roll?.result, modifier: m.dice_roll?.modifier,
-        total: m.dice_roll?.total, stat: m.dice_roll?.stat,
-        createdAt: m.created_at,
-      })))
+      }) => {
+        // Normalize the message type coming from the DB to the allowed union
+        const rawType = m.type
+        const allowed = rawType === 'player_action' || rawType === 'dm_narration' || rawType === 'system'
+        const type = allowed ? rawType as 'player_action' | 'dm_narration' | 'system' : 'system'
+
+        return {
+          id: m.id,
+          type,
+          content: m.content,
+          username: m.session_players?.users?.username,
+          diceRoll: m.dice_roll?.result ?? undefined,
+          modifier: m.dice_roll?.modifier ?? undefined,
+          total: m.dice_roll?.total ?? undefined,
+          stat: m.dice_roll?.stat ?? undefined,
+          createdAt: m.created_at,
+        }
+      }))
     }
   }
 

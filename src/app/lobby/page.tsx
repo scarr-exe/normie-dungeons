@@ -76,7 +76,7 @@ export default function LobbyPage() {
     setError('')
     const session = await createSession(user.id, pendingMode)
     if (!session) { setError('Failed to create session.'); setLoading(false); return }
-    const added = await addPlayerToSession(session.id, user.id, selectedNormie.id, selectedNormie.characterClass, selectedNormie.stats, selectedNormie.maxHp, 1)
+    const added = await addPlayerToSession(session.id, user.id, selectedNormie.id, selectedNormie.characterClass, selectedNormie.stats as unknown as Record<string, number>, selectedNormie.maxHp, 1)
     if (!added) { setError('Failed to enter dungeon.'); setLoading(false); return }
     if (pendingMode === 'party') router.push(`/party/${session.id}`)
     else router.push(`/game/${session.id}`)
@@ -93,7 +93,7 @@ export default function LobbyPage() {
     if (alreadyIn) { router.push(`/party/${session.id}`); return }
     const turnOrder = players.length + 1
     if (turnOrder > 4) { setError('This party is full.'); setLoading(false); return }
-    const added = await addPlayerToSession(session.id, user.id, selectedNormie.id, selectedNormie.characterClass, selectedNormie.stats, selectedNormie.maxHp, turnOrder)
+    const added = await addPlayerToSession(session.id, user.id, selectedNormie.id, selectedNormie.characterClass, selectedNormie.stats as unknown as Record<string, number>, selectedNormie.maxHp, turnOrder)
     if (!added) { setError('Failed to join.'); setLoading(false); return }
     router.push(`/party/${session.id}`)
   }

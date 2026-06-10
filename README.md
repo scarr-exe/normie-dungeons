@@ -135,6 +135,11 @@ normie-dungeons/
 ├─ tsconfig.json
 ├─ public/
 │  └─ (static assets)
+├─ assets/
+│  ├─ victory_screen.png
+│  ├─ defeat_screen.png
+│  ├─ normie_selector.png
+│  └─ tutorial.png
 └─ src/
   ├─ app/
   │  ├─ page.tsx                # Landing page
@@ -156,3 +161,24 @@ normie-dungeons/
   ├─ lib/                       # ai.ts, normies.ts, sessions.ts, supabase.ts
   └─ types/                     # game.ts, normie.ts
 ```
+
+## Assets
+
+The repository includes several example screenshots used in the README and landing pages. They are stored in the `assets/` folder at the project root and can be referenced with relative paths.
+
+- Victory screen
+
+  ![Victory screen](assets/victory_screen.png)
+
+- Defeat screen
+
+  ![Defeat screen](assets/defeat_screen.png)
+
+- Normie selector
+
+  ![Normie selector](assets/normie_selector.png)
+
+- Tutorial screenshot
+
+  ![Tutorial screenshot](assets/tutorial.png)
+

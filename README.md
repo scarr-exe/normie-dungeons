@@ -1,157 +1,127 @@
 # Normie Dungeons
 
-A D&D-style dungeon crawler where Normie NFT traits become your character stats. Runs can be solo or party-based, with an AI Dungeon Master narrating each turn and generating the dungeon theme and art.
+Normie Dungeons is a D&D-style dungeon crawler web app that maps Normie NFT traits to character stats. Runs can be solo or party-based and are narrated live by an AI Dungeon Master. The app uses Supabase for real-time session state and messaging and integrates wallet connections to verify Normie ownership.
 
-## Table of contents
-- Overview
-- Gameplay loop
-- Key features
-- Tech stack
-- Project structure
-- Routes
-- API endpoints
-- Supabase data model
-- Environment variables
-- Local development
-- Scripts
-- Deployment notes
+---
 
-## Overview
-Normie Dungeons is a Next.js app that combines:
-- Normie NFT metadata for character stats and class selection
-- An AI Dungeon Master that narrates outcomes and drives the dungeon
-- Supabase for real-time session state and messaging
-- Wallet integration for ownership verification and party play
+## Quick links
+- Main landing page: [src/app/page.tsx](src/app/page.tsx#L1)
+- Game room: [src/app/game/[sessionId]/page.tsx](src/app/game/[sessionId]/page.tsx#L1)
+- DM init endpoint: [src/app/api/dm/init/route.ts](src/app/api/dm/init/route.ts#L1)
+- DM turn endpoint: [src/app/api/dm/turn/route.ts](src/app/api/dm/turn/route.ts#L1)
 
-## Gameplay loop
-1. Landing page: explain the game and prompt the player to start.
-2. Lobby: choose solo, create a party, or join with a code.
-3. Party room: host shares the invite code and starts the run.
-4. Game room: each player submits actions in turn, dice rolls resolve outcomes.
-5. Victory or defeat pages summarize the run and allow restarting.
+---
 
-## Key features
-- Trait-driven stats: Normie traits map to STR/DEX/CON/INT/WIS/CHA and class.
-- AI DM narration: each action is resolved with a dice roll and narrated outcome.
-- Party mode: up to 4 players share a dungeon session with turn order.
-- Real-time updates: Supabase channels sync players, messages, and game state.
-- Dungeon art: a generated scene image is shown per dungeon.
+## Features
+- Trait-driven character creation: Normie metadata traits are converted into D&D-style ability scores and a class selection.
+- AI Dungeon Master: Groq-based chat completions generate atmospheric narrations and outcome decisions.
+- Party mode: create or join sessions with an invite code; turn-based play with up to 4 players.
+- Real-time sync: Supabase Realtime (channels) synchronizes messages, game state, and player lists.
+- Wallet integration: RainbowKit + wagmi for wallet connect and holder checks.
+
+---
 
 ## Tech stack
-- Next.js 16 (App Router), React 19, TypeScript
-- Tailwind CSS 4 (used in some components), inline style objects elsewhere
-- Supabase JS for database and real-time events
-- RainbowKit + wagmi + viem for wallet connect and holder checks
-- React Query for client cache
-- framer-motion for animation
-- Groq OpenAI-compatible API for AI narration
+- Next.js 16 (App Router) + React 19 + TypeScript
+- Tailwind CSS 4 (project uses a few Tailwind primitives and global CSS)
+- Supabase JS for database and realtime events
+- RainbowKit, wagmi, viem for wallet features
+- Groq (OpenAI-compatible) for AI narration
+- framer-motion for UI animation
+- React Query for client state caching
 
-## Project structure
-- src/app
-  - layout.tsx and providers.tsx for global layout and providers
-  - page.tsx for the landing page
-  - lobby, party, game routes
-  - api routes for AI narration and demo
-- src/components
-  - game: CharacterSheet, DiceRoll, NormieSelector
-  - tutorial: TutorialModal (not currently wired to a page)
-  - ui: UsernameModal
-- src/hooks
-  - useUser: user profile + holder badge logic
-  - useNormie: fetch and build a character
-  - useWalletNormies: list owned Normies
-- src/lib
-  - ai: Groq chat completion client
-  - normies: trait and stat logic
-  - sessions: Supabase session helpers
-  - supabase: Supabase client
-- src/types
-  - game: shared game types
-  - normie: Normie traits and stats types
-- public
-  - default Next.js assets
+---
 
-## Routes
-- / : landing page and entry point
-- /lobby : choose solo/party/join and select Normie
-- /party/[sessionId] : party waiting room (host starts session)
-- /game/[sessionId] : main game room
-- /game/[sessionId]/victory : victory summary and share text
-- /game/[sessionId]/defeat : defeat screen
+## Quick start (local)
+1. Install dependencies
 
-## API endpoints
-All endpoints are Next.js route handlers under src/app/api.
+```bash
+npm install
+```
 
-- POST /api/dm/init
-  - Body: { players: [{ username, characterClass, normieId, stats, hasScarredPassive }], mode }
-  - Returns: { dungeonName, bossName, opening, imageUrl }
-  - Uses Groq to generate an opening scene and a pollinations.ai image URL.
+2. Create `.env.local` with required variables (see Environment variables below).
 
-- POST /api/dm/turn
-  - Body: { action, player, allPlayers, dungeonName, roomNumber, totalRooms, messageHistory }
-  - Returns: { narration, hpChange, roomCleared, playerDefeated, dungeonComplete, diceRoll, modifier, total, stat }
-  - Uses Groq to narrate the outcome and provide roll effects.
+3. Run the dev server
 
-- POST /api/claude/tutorial-demo
-  - Body: { action, normie }
-  - Returns: { narration, diceRoll, modifier, total, stat }
-  - Simple tutorial narration for demo actions.
+```bash
+npm run dev
+```
 
-- GET /api/normies/test
-  - Returns: { success, normie } for Normie #1
-
-## Supabase data model
-Tables are inferred from usage in the code and must exist in Supabase:
-
-- users
-  - id, username, wallet_address, badge, session_token
-
-- sessions
-  - id, invite_code, host_id, status (lobby/active/completed)
-  - mode (solo/party), current_room, total_rooms
-
-- session_players
-  - id, session_id, user_id
-  - normie_id, character_class, stats, hp, max_hp
-  - turn_order, is_active, last_seen
-
-- game_state
-  - session_id, current_turn_player_id
-  - dungeon_name, dungeon_description, current_room_description
-  - state (JSON), updated_at
-
-- messages
-  - session_id, player_id, type (player_action/dm_narration/system)
-  - content, dice_roll, created_at
-
-## Environment variables
-Create a .env.local file with the following values:
-
-- NEXT_PUBLIC_SUPABASE_URL: Supabase project URL
-- NEXT_PUBLIC_SUPABASE_ANON_KEY: Supabase anon key
-- NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: WalletConnect project ID
-- GROQ_API_KEY: Groq API key for narration
-- NEXT_PUBLIC_NORMIES_API_BASE (optional): defaults to https://api.normies.art
-- NORMIES_API_BASE (optional): server-side base URL for Normies API
-
-## Local development
-1. Install dependencies:
-   - npm install
-2. Set environment variables in .env.local.
-3. Run the dev server:
-   - npm run dev
 4. Open http://localhost:3000
 
-## Scripts
-- npm run dev: start Next.js dev server
-- npm run build: production build
-- npm run start: start production server
-- npm run lint: run ESLint
+---
 
-## Deployment notes
-- The app expects Supabase tables and RLS policies that allow the required reads and writes.
-- External services used at runtime:
-  - https://api.normies.art for Normie metadata and holder checks
-  - https://api.groq.com for AI narration
-  - https://image.pollinations.ai for dungeon art
-- Next.js images allow remote loading from api.normies.art and image.pollinations.ai (see next.config.ts).
+## Environment variables
+Create `.env.local` in the project root and set the following:
+
+- `NEXT_PUBLIC_SUPABASE_URL` — your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon key
+- `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` — WalletConnect project id
+- `GROQ_API_KEY` — API key for Groq (AI narration)
+- `NEXT_PUBLIC_NORMIES_API_BASE` (optional) — defaults to `https://api.normies.art`
+- `NORMIES_API_BASE` (optional) — server-side base URL for the Normies API
+
+---
+
+## Scripts
+Available npm scripts (from `package.json`):
+
+- `npm run dev` — start Next.js dev server
+- `npm run build` — create production build
+- `npm run start` — start production server
+- `npm run lint` — run ESLint
+
+---
+
+## Routes & API endpoints
+Most server logic is implemented as Next.js route handlers under `src/app/api`.
+
+- `POST /api/dm/init` — initialize a dungeon run. See [src/app/api/dm/init/route.ts](src/app/api/dm/init/route.ts#L1).
+  - Expects a `players` list and `mode` (solo/party). Returns dungeon name, boss name, opening narration, and an image URL.
+
+- `POST /api/dm/turn` — resolve a player action.
+  - Expects `action`, `player`, `allPlayers`, `dungeonName`, current `roomNumber`, `totalRooms`, and recent `messageHistory`. Returns narration, hp changes, room/dungeon progress and dice info. Implemented in [src/app/api/dm/turn/route.ts](src/app/api/dm/turn/route.ts#L1).
+
+- `POST /api/claude/tutorial-demo` — tutorial/demo DM narration. Implemented in [src/app/api/claude/tutorial-demo/route.ts](src/app/api/claude/tutorial-demo/route.ts#L1).
+
+- `GET /api/normies/test` — returns a built Normie character for ID 1. Implemented in [src/app/api/normies/test/route.ts](src/app/api/normies/test/route.ts#L1).
+
+Client pages interact with Supabase and the DM endpoints instead of implementing heavy game logic on the server.
+
+---
+
+## Database model (Supabase)
+Tables expected (inferred from code):
+
+- `users` — stores user records with `id`, `username`, `wallet_address`, `badge`, and `session_token`.
+- `sessions` — stores active sessions: `id`, `invite_code`, `host_id`, `status`, `mode`, `current_room`, `total_rooms`.
+- `session_players` — players in a session: `id`, `session_id`, `user_id`, `normie_id`, `character_class`, `stats`, `hp`, `max_hp`, `turn_order`, `is_active`, `last_seen`.
+- `game_state` — per-session state: `session_id`, `current_turn_player_id`, `dungeon_name`, `dungeon_description`, `current_room_description`, `state` (JSON), `updated_at`.
+- `messages` — activity log: `session_id`, `player_id`, `type`, `content`, `dice_roll`, `created_at`.
+
+You will need appropriate RLS policies and service roles if deploying to production.
+
+---
+
+## Important files
+- `src/app/page.tsx` — landing page and hero UI. ([link](src/app/page.tsx#L1))
+- `src/app/game/[sessionId]/page.tsx` — main game room (turn handling, Supabase realtime listeners). ([link](src/app/game/[sessionId]/page.tsx#L1))
+- `src/lib/normies.ts` — fetch Normie metadata, convert traits to stats, assign class, build character. ([link](src/lib/normies.ts#L1))
+- `src/lib/ai.ts` — Groq chat completion wrapper used by DM endpoints. ([link](src/lib/ai.ts#L1))
+- `src/lib/supabase.ts` — Supabase client. ([link](src/lib/supabase.ts#L1))
+
+---
+
+## Development notes & suggestions
+- The DM endpoints parse JSON from LLM outputs using a regex. The code contains fallback behaviour but consider improving response validation and adding strict schema checks.
+- `src/lib/claude.ts` is empty and available for adding a Claude client if desired.
+- Tests and staging Supabase instance are recommended before production deployment.
+
+---
+
+## Contact / Contribution
+Open a PR or issue in this repository for changes, or reach out to the maintainers recorded in project settings.
+
+---
+
+Last update: automatically generated from repository files.

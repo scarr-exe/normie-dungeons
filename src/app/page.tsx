@@ -14,10 +14,10 @@ const C = { bg: '#0d0d0f', panel: '#13131a', border: '#252535', gold: '#c8a85c',
 
 const SHOWCASE_NORMIES = ['1', '42', '100', '420', '999', '1337', '4200', '8888', '5555', '2077', '7777', '3333']
 const FEATURES = [
-  { label: 'AI DUNGEON MASTER', title: 'Every run is unique', desc: 'An AI narrates your adventure in real time, responding to every decision you make. No two dungeons are the same.' },
-  { label: 'TRAIT-BASED STATS', title: 'Your Normie is your character', desc: "Eyes, expression, hair, accessories — every trait maps to a D&D stat. Your Normie's traits determine your class." },
-  { label: '30+ DUNGEON THEMES', title: 'From crypts to space stations', desc: 'Fantasy dungeons, zombie apocalypses, sci-fi facilities, detective agencies — the AI picks a theme and builds your world.' },
-  { label: 'SOLO & PARTY MODE', title: 'Face it alone or with friends', desc: 'Solo runs or party dungeons with up to 4 adventurers. Share an invite code and explore the same dungeon together.' },
+  { title: 'EVERY RUN IS UNIQUE', desc: 'Thhe Dungeon Master narrates your adventure in real time, responding to every decision you make. No two dungeons are the same.' },
+  { title: 'YOUR NORMIE IS YOUR CHARACTER', desc: "Eyes, expression, hair, accessories — every trait maps to a D&D stat. Your Normie's traits determine your class." },
+  { title: 'MULTIPLE THEMES', desc: 'Fantasy dungeons, zombie apocalypses, sci-fi facilities, detective agencies — the Dungeon Master picks a theme and builds your world.' },
+  { title: 'FACE IT ALONE OR WITH FRIENDS', desc: 'Solo runs or party dungeons with up to 4 adventurers. Share an invite code and explore the same dungeon together.' },
 ]
 const STEPS = [
   { num: '01', title: 'ENTER YOUR NORMIE', desc: 'Connect your wallet or enter any Normie ID. Your traits become your stats.' },
@@ -137,7 +137,7 @@ export default function LandingPage() {
       {/* Nav */}
       <nav style={{ borderBottom: `1px solid ${C.border}`, padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.panel, position: 'relative', zIndex: 50 }}>
         <span style={{ fontFamily: 'Cinzel, serif', fontSize: '13px', color: C.gold, letterSpacing: '0.1em' }}>⚔ NORMIE DUNGEONS</span>
-        
+
         {/* Desktop Nav */}
         <div className="hidden md:flex" style={{ alignItems: 'center', gap: '24px' }}>
           <a href="https://normies.art" target="_blank" rel="noopener noreferrer" style={{ fontSize: '11px', color: C.textMuted, textDecoration: 'none', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Normies.art</a>
@@ -147,8 +147,8 @@ export default function LandingPage() {
         </div>
 
         {/* Mobile Nav Hamburger */}
-        <button 
-          className="md:hidden block" 
+        <button
+          className="md:hidden block"
           style={{ background: 'none', border: 'none', color: C.gold, fontSize: '24px', cursor: 'pointer', padding: '0 8px' }}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
@@ -169,33 +169,24 @@ export default function LandingPage() {
       {/* Hero */}
       <section style={{ position: 'relative', borderBottom: `1px solid ${C.border}`, overflow: 'hidden' }}>
         <div className="hero-padding" style={{ textAlign: 'center', position: 'relative', zIndex: 10 }}>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} style={{ fontSize: '13px', color: C.textMuted, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '24px' }}>Built on Normies · Powered by AI</motion.p>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} style={{ fontSize: '13px', color: C.textMuted, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '24px' }}>Built on Normies</motion.p>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ fontFamily: 'Cinzel, serif', fontSize: 'clamp(40px, 8vw, 80px)', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '24px', lineHeight: 1.1, color: C.text }}>
             NORMIE<br />DUNGEONS
           </motion.h1>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} style={{ fontSize: '13px', color: C.textMuted, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>D&amp;D-STYLE DUNGEON CRAWLER FOR NORMIE NFT HOLDERS</motion.p>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} style={{ fontSize: '15px', color: C.textDim, maxWidth: '400px', margin: '0 auto 48px', lineHeight: 1.7 }}>Your Normie is your character. Its traits become your stats. An AI Dungeon Master generates your world and narrates every move.</motion.p>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} style={{ fontSize: '13px', color: C.textMuted, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}></motion.p>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} style={{ fontSize: '15px', color: C.textDim, maxWidth: '400px', margin: '0 auto 48px', lineHeight: 1.7 }}>Your Normie is your character. Its traits become your stats. An AI Dungeon Master creates your world and narrates every move.</motion.p>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} style={{ display: 'flex', gap: '16px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
             <button onClick={() => setShowModal(true)} style={{ ...btnOutline, padding: '16px 32px', fontSize: '12px', fontFamily: 'Cinzel, serif' }}>ENTER DUNGEON →</button>
-            <a href="https://normies.art" target="_blank" rel="noopener noreferrer" style={{ fontSize: '11px', color: C.textMuted, textDecoration: 'none', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Get a Normie ↗</a>
+            <a href="https://opensea.io/collection/normies" target="_blank" rel="noopener noreferrer" style={{ fontSize: '11px', color: C.textMuted, textDecoration: 'none', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Get a Normie ↗</a>
           </motion.div>
         </div>
-        <div style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0.15 }}>
-          <div style={{ display: 'flex', height: '100%' }}>
-            {normieImages.map((id, i) => (
-              <div key={i} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-                <Image src={`https://api.normies.art/normie/${id}/image.png`} alt="" fill style={{ objectFit: 'cover', imageRendering: 'pixelated' }} unoptimized />
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* background removed by user request */}
       </section>
 
       {/* What is it */}
       <section style={{ borderBottom: `1px solid ${C.border}`, padding: '80px 32px' }}>
         <div className="landing-grid-2" style={{ maxWidth: '900px', margin: '0 auto', gap: '64px', alignItems: 'center' }}>
           <div>
-            <p style={{ fontSize: '11px', color: C.orange, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>WHAT IS NORMIE DUNGEONS?</p>
             <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: '24px', color: C.text, marginBottom: '24px', lineHeight: 1.3 }}>YOUR NFT.<br />YOUR CHARACTER.</h2>
             <p style={{ fontSize: '15px', color: C.textDim, lineHeight: 1.8, marginBottom: '16px' }}>Normie Dungeons turns your on-chain NFT into a D&D character. Each Normie's traits map directly to stats like WIS, CHA, STR, and DEX.</p>
             <p style={{ fontSize: '15px', color: C.textDim, lineHeight: 1.8 }}>No Normie? Use any token ID. Holders get a verified badge.</p>
@@ -232,22 +223,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How it works */}
-      <section style={{ borderBottom: `1px solid ${C.border}`, padding: '80px 32px' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <p style={{ fontSize: '11px', color: C.orange, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '48px', textAlign: 'center' }}>HOW IT WORKS</p>
-          <div className="landing-grid-3" style={{ gap: '1px', background: C.border }}>
-            {STEPS.map((s, i) => (
-              <div key={i} style={{ background: C.bg, padding: '32px' }}>
-                <p style={{ fontFamily: 'Cinzel, serif', fontSize: '32px', color: C.border, marginBottom: '16px' }}>{s.num}</p>
-                <h3 style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', marginBottom: '12px', color: C.text }}>{s.title}</h3>
-                <p style={{ fontSize: '13px', color: C.textDim, lineHeight: 1.7 }}>{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Stats */}
       <section style={{ borderBottom: `1px solid ${C.border}`, padding: '48px 32px' }}>
         <div className="landing-grid-3" style={{ maxWidth: '900px', margin: '0 auto', gap: '1px', background: C.border }}>
@@ -271,8 +246,7 @@ export default function LandingPage() {
       <footer style={{ borderTop: `1px solid ${C.border}`, padding: '24px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontFamily: 'Cinzel, serif', fontSize: '11px', color: C.textMuted }}>NORMIE DUNGEONS</span>
         <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <a href="https://normies.art" target="_blank" rel="noopener noreferrer" style={{ fontSize: '11px', color: C.textMuted, textDecoration: 'none' }}>Built on Normies</a>
-          <span style={{ fontSize: '11px', color: C.textMuted }}>Powered by Groq + Supabase</span>
+          <span style={{ fontSize: '11px', color: C.textMuted }}>2026 Normie Dungeons</span>
         </div>
       </footer>
 

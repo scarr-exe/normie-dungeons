@@ -114,6 +114,7 @@ export default function GameRoom() {
   const [pendingDiceRoll, setPendingDiceRoll] = useState<{ roll: number; modifier: number; total: number; stat: string } | null>(null)
   const [sessionTime, setSessionTime] = useState(0)
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageFailed, setImageFailed] = useState(false)
   const [copied, setCopied] = useState(false)
   const logEndRef = useRef<HTMLDivElement>(null)
 
@@ -122,6 +123,15 @@ export default function GameRoom() {
   const currentTurnPlayer = players.find(p => p.id === currentTurnPlayerId)
   const latestDmMessage = messages.filter(m => m.type === 'dm_narration').slice(-1)[0]
   const activePlayers = players.filter(p => p.isActive)
+
+
+  useEffect(() => {
+    if (!gameState?.imageUrl) return
+    const timeout = setTimeout(() => {
+      if (!imageLoaded) setImageFailed(true)
+    }, 20000)
+    return () => clearTimeout(timeout)
+  }, [gameState?.imageUrl, imageLoaded])
 
   useEffect(() => {
     if (user) loadGame()
@@ -184,6 +194,7 @@ export default function GameRoom() {
   async function loadGameState() {
     const { data } = await supabase.from('game_state').select('*').eq('session_id', sessionId).maybeSingle()
     if (data) {
+       console.log('Image URL from DB:', data.state?.imageUrl)
       setGameState({ dungeonName: data.dungeon_name, currentRoomDescription: data.current_room_description, imageUrl: data.state?.imageUrl, bossName: data.state?.bossName, state: data.state })
       setCurrentTurnPlayerId(data.current_turn_player_id)
     }
@@ -468,28 +479,46 @@ export default function GameRoom() {
           </div>
 
           {/* Dungeon scene image */}
+          {/* Dungeon scene image */}
           <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#080808', minHeight: '200px' }}>
-            {gameState?.imageUrl && (
+            {gameState?.imageUrl && !imageFailed && (
               <motion.img
                 src={gameState.imageUrl}
                 alt="Dungeon scene"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: imageLoaded ? 1 : 0 }}
-                transition={{ duration: 1 }}
+                transition={{ duration: 1.5 }}
                 onLoad={() => setImageLoaded(true)}
+                onError={() => setImageFailed(true)}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />
             )}
-            {!imageLoaded && (
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <motion.p animate={{ opacity: [0.3, 0.7, 0.3] }} transition={{ repeat: Infinity, duration: 2 }}
-                  style={{ fontSize: '10px', color: C.textMuted, letterSpacing: '0.2em' }}>
-                  RENDERING DUNGEON...
-                </motion.p>
+
+            {/* Atmospheric fallback while loading or if failed */}
+            {(!imageLoaded || imageFailed) && (
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'radial-gradient(ellipse at 30% 50%, #1a0f05 0%, #0d0d0f 60%, #050508 100%)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px',
+              }}>
+                {!imageFailed ? (
+                  <motion.p animate={{ opacity: [0.3, 0.7, 0.3] }} transition={{ repeat: Infinity, duration: 2 }}
+                    style={{ fontSize: '10px', color: '#4a3f25', letterSpacing: '0.25em', fontFamily: 'Cinzel, serif' }}>
+                    RENDERING DUNGEON...
+                  </motion.p>
+                ) : (
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ fontSize: '24px', marginBottom: '8px' }}>🕯</p>
+                    <p style={{ fontSize: '10px', color: '#4a3f25', letterSpacing: '0.2em', fontFamily: 'Cinzel, serif' }}>
+                      {gameState?.dungeonName?.toUpperCase() || 'THE DUNGEON'}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
-            {/* Gradient overlay for readability */}
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(13,13,15,0.3) 0%, transparent 30%, transparent 70%, rgba(13,13,15,0.8) 100%)', pointerEvents: 'none' }} />
+
+            {/* Gradient overlay */}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(13,13,15,0.2) 0%, transparent 30%, transparent 70%, rgba(13,13,15,0.7) 100%)', pointerEvents: 'none' }} />
           </div>
 
           {/* Action input */}

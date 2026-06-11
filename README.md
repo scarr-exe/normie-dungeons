@@ -162,9 +162,9 @@ normie-dungeons/
   └─ types/                     # game.ts, normie.ts
 ```
 
-## Assets
+## Game Screenshots
 
-The repository includes several example screenshots used in the README and landing pages. They are stored in the `assets/` folder at the project root and can be referenced with relative paths.
+This includes screenshots of the game.
 
 - Victory screen
 
@@ -182,3 +182,6 @@ The repository includes several example screenshots used in the README and landi
 
   ![Tutorial screenshot](assets/tutorial.png)
 
+---
+
+Built by @scarr_exe. ([link](https://x.com/scarr_exe))

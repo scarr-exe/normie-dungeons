@@ -184,4 +184,4 @@ This includes screenshots of the game.
 
 ---
 
-Built by @scarr_exe. ([link](https://x.com/scarr_exe))
+Built by ([@scarr-exe](https://x.com/scarr_exe)).
